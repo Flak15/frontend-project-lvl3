@@ -1,7 +1,10 @@
+const parseXMLTextElement = el => el.childNodes[0].nodeValue;
+// Array.from(el.childNodes).map(child => child.nodeValue).join();
+
 export default class RSSItem {
   constructor(xmlItem) {
-    this.title = xmlItem.querySelector('title').innerHTML;
-    this.description = xmlItem.querySelector('description').innerHTML;
+    this.title = parseXMLTextElement(xmlItem.querySelector('title'));
+    this.description = parseXMLTextElement(xmlItem.querySelector('description'));
     this.link = xmlItem.querySelector('link').innerHTML;
     this.pubDate = new Date(xmlItem.querySelector('pubDate').innerHTML);
   }
