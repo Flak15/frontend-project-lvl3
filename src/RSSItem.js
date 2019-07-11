@@ -19,7 +19,7 @@ export default class RSSItem {
         <p>${this.pubDate.toDateString()}</p>
         <p>Источник: ${this.source}</p>
         <a class="btn btn-primary btn-lg" href="${this.link}" role="button">Learn more</a>
-        <a class="btn btn-info btn-lg" href="${this.link}" role="button" id="description">Show more</a>
+        <a class="btn btn-info btn-lg descr" href="${this.link}" role="button">Show more</a>
       </div>`;
     return jumbotron;
   }

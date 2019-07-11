@@ -1,6 +1,7 @@
 import WatchJS from 'melanke-watchjs';
 import validator from 'validator';
 import axios from 'axios';
+import $ from 'jquery';
 import RSSItem from './RSSItem';
 
 export default () => {
@@ -57,5 +58,5 @@ export default () => {
     addButton.classList.add('btn-secondary');
   });
 
-  document.querySelectorAll('#description').forEach(descrButton => descrButton.addEventListener('mouseover', () => alert('mouseover')));
+  $(document).on('mouseover', '.descr', (e) => alert(e.target.closest('div').querySelector('.lead').innerHTML));
 };
