@@ -4,6 +4,7 @@ export default class Modal {
   constructor(item) {
     this.description = item.description || 'Без описания';
     this.title = item.title;
+    this.link = item.link;
     this.id = _.uniqueId();
   }
 
@@ -15,7 +16,6 @@ export default class Modal {
         Подробнее
       </button>
 
-      <!-- Modal -->
       <div class="modal fade" id="modal_${this.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -29,6 +29,7 @@ export default class Modal {
               ${this.description}
             </div>
             <div class="modal-footer">
+              <a class="btn btn-primary" href="${this.link}" role="button">Learn more</a>
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
           </div>
