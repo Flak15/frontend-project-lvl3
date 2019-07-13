@@ -14,7 +14,7 @@ export default () => {
   const addButton = document.querySelector('#add');
   const container = document.querySelector('#mount');
   const input = document.querySelector('#basic-url');
-
+  const info = document.querySelector('#info');
   WatchJS.watch(state, 'items', () => {
     const { items } = state;
     items.map(item => container.append(item.render()));
@@ -22,12 +22,13 @@ export default () => {
 
   const request = (url) => {
     axios.get(url).then((res) => {
+      info.innerHTML = '';
       const parser = new DOMParser();
       const document = parser.parseFromString(res.data, 'application/xml');
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
       const newItems = Array.from(items).map(item => new RSSItem(item, source));
-      state.items = [...state.items, ...newItems].sort((a, b) => a.pubDate - b.pubDate);
+      state.items = [...state.items, ...newItems].sort((a, b) =>  b.pubDate - a.pubDate);
     });
   };
 
@@ -50,6 +51,7 @@ export default () => {
   });
 
   addButton.addEventListener('click', () => {
+    info.innerHTML = 'Загрузка...';
     request(`https://cors-anywhere.herokuapp.com/${state.input}`);
     state.sources = [...state.sources, state.input];
     input.value = '';
@@ -58,5 +60,5 @@ export default () => {
     addButton.classList.add('btn-secondary');
   });
 
-  $(document).on('mouseover', '.descr', (e) => alert(e.target.closest('div').querySelector('.lead').innerHTML));
+  // $(document).on('mouseover', '.descr', (e) => alert(e.target.closest('div').querySelector('.lead').innerHTML));
 };
