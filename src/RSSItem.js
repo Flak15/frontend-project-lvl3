@@ -15,9 +15,9 @@ export default class RSSItem {
     const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декбря'];
     const jumbotron = document.createElement('div');
     jumbotron.classList.add('jumbotron');
-    jumbotron.innerHTML = `<div class="jumbotron">
+    jumbotron.innerHTML = `
         <h1 class="display-4">${this.title}</h1>
-        <p class="lead">${this.description}</p>
+        
         <hr class="my-4">
         <p>${this.pubDate.getDate()} ${monthNames[this.pubDate.getMonth()]} ${this.pubDate.getFullYear()}</p>
         <p>Источник: ${this.source}</p>`;

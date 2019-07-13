@@ -9,19 +9,22 @@ export default () => {
     inputValue: '',
     sources: [],
     items: [],
+    lastUpdate: 0,
   };
 
   const addButton = document.querySelector('#add');
   const container = document.querySelector('#mount');
   const input = document.querySelector('#basic-url');
   const info = document.querySelector('#info');
+  
   WatchJS.watch(state, 'items', () => {
     const { items } = state;
     items.map(item => container.append(item.render()));
   });
 
-  const request = (url) => {
-    axios.get(url).then((res) => {
+  const addNewSource = (url) => {
+    state.sources = [...state.sources, url];
+    axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
       info.innerHTML = '';
       const parser = new DOMParser();
       const document = parser.parseFromString(res.data, 'application/xml');
@@ -29,6 +32,21 @@ export default () => {
       const source = document.querySelector('channel title');
       const newItems = Array.from(items).map(item => new RSSItem(item, source));
       state.items = [...state.items, ...newItems].sort((a, b) =>  b.pubDate - a.pubDate);
+    });
+  };
+
+  const update = () => {
+    const url = this.state.sources[0];
+    axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
+      const parser = new DOMParser();
+      const document = parser.parseFromString(res.data, 'application/xml');
+      const items = document.querySelectorAll('item');
+      const source = document.querySelector('channel title');
+      const newItems = Array.from(items).filter(item => {
+        const itemDate = new Date(item.querySelector('pubDate').innerHTML);
+        return itemDate > this.state.lastUpdate;
+      });
+
     });
   };
 
@@ -52,13 +70,11 @@ export default () => {
 
   addButton.addEventListener('click', () => {
     info.innerHTML = 'Загрузка...';
-    request(`https://cors-anywhere.herokuapp.com/${state.input}`);
-    state.sources = [...state.sources, state.input];
+    addNewSource(state.input);
     input.value = '';
     input.classList.remove('is-valid');
     addButton.classList.remove('btn-success');
     addButton.classList.add('btn-secondary');
   });
 
-  // $(document).on('mouseover', '.descr', (e) => alert(e.target.closest('div').querySelector('.lead').innerHTML));
 };

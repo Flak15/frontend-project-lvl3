@@ -12,7 +12,7 @@ export default class Modal {
 
     const modal = document.createElement('div');
     modal.innerHTML = `
-      <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modal_${this.id}">
+      <button type="button" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#modal_${this.id}">
         Подробнее
       </button>
 
@@ -29,8 +29,8 @@ export default class Modal {
               ${this.description}
             </div>
             <div class="modal-footer">
-              <a class="btn btn-primary" href="${this.link}" role="button">Learn more</a>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <a class="btn btn-primary" href="${this.link}" role="button">Читать в источнике</a>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
             </div>
           </div>
         </div>
