@@ -13,13 +13,14 @@ export default class RSSItem {
 
   render() {
 
+    const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декбря'];
     const jumbotron = document.createElement('div');
     jumbotron.classList.add('jumbotron');
     jumbotron.innerHTML = `<div class="jumbotron">
         <h1 class="display-4">${this.title}</h1>
         <p class="lead">${this.description}</p>
         <hr class="my-4">
-        <p>${this.pubDate.toDateString()}</p>
+        <p>${this.pubDate.getDate()} ${monthNames[this.pubDate.getMonth()]} ${this.pubDate.getFullYear()}</p>
         <p>Источник: ${this.source}</p>
         <a class="btn btn-primary btn-lg" href="${this.link}" role="button">Learn more</a>
         <a class="btn btn-info btn-lg descr" href="${this.link}" role="button">Show more</a>`;
