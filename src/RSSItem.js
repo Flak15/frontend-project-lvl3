@@ -9,17 +9,22 @@ export default class RSSItem {
     this.pubDate = new Date(xmlItem.querySelector('pubDate').innerHTML);
   }
 
+  showModal() {
+    alert(this.description);
+  }
+
   render() {
+    const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декбря'];
     const jumbotron = document.createElement('div');
     jumbotron.classList.add('jumbotron');
     jumbotron.innerHTML = `<div class="jumbotron">
         <h1 class="display-4">${this.title}</h1>
         <p class="lead">${this.description}</p>
         <hr class="my-4">
-        <p>${this.pubDate.toDateString()}</p>
+        <p>${this.pubDate.getDate()} ${monthNames[this.pubDate.getMonth()]} ${this.pubDate.getFullYear()}</p>
         <p>Источник: ${this.source}</p>
-        <a class="btn btn-primary btn-lg" href="${this.link}" role="button">Learn more</a>
-        <a class="btn btn-info btn-lg" href="${this.link}" role="button" id="description">Show more</a>
+        <a class="btn btn-primary btn-lg" href="${this.link}" role="button">Читать в источнике</a>
+        <a class="btn btn-info btn-lg descr" href="${this.link}" role="button">Подробнее</a>
       </div>`;
     return jumbotron;
   }

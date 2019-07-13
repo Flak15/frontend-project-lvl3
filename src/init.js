@@ -1,6 +1,7 @@
 import WatchJS from 'melanke-watchjs';
 import validator from 'validator';
 import axios from 'axios';
+import $ from 'jquery';
 import RSSItem from './RSSItem';
 
 export default () => {
@@ -26,7 +27,7 @@ export default () => {
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
       const newItems = Array.from(items).map(item => new RSSItem(item, source));
-      state.items = [...state.items, ...newItems].sort((a, b) => a.pubDate - b.pubDate);
+      state.items = [...state.items, ...newItems].sort((a, b) =>  b.pubDate - a.pubDate);
     });
   };
 
@@ -56,6 +57,6 @@ export default () => {
     addButton.classList.remove('btn-success');
     addButton.classList.add('btn-secondary');
   });
-
-  document.querySelectorAll('#description').forEach(descrButton => descrButton.addEventListener('mouseover', () => alert('mouseover')));
+  $(document).on('mouseover', '.descr', () => alert('click'));
+  //document.querySelectorAll('#description').forEach(descrButton => descrButton.addEventListener('mouseover', () => alert('mouseover')));
 };
