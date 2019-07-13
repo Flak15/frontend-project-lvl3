@@ -57,6 +57,6 @@ export default () => {
     addButton.classList.remove('btn-success');
     addButton.classList.add('btn-secondary');
   });
-  $(document).on('mouseover', '.descr', () => alert('click'));
-  //document.querySelectorAll('#description').forEach(descrButton => descrButton.addEventListener('mouseover', () => alert('mouseover')));
+
+  $(document).on('mouseover', '.descr', (e) => alert(e.target.closest('div').querySelector('.lead').innerHTML));
 };

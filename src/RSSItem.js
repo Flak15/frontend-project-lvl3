@@ -1,3 +1,5 @@
+import Modal from './Modal';
+
 const parseXMLTextElement = el => Array.from(el.childNodes).map(child => child.nodeValue).join('');
 
 export default class RSSItem {
@@ -23,9 +25,10 @@ export default class RSSItem {
         <hr class="my-4">
         <p>${this.pubDate.getDate()} ${monthNames[this.pubDate.getMonth()]} ${this.pubDate.getFullYear()}</p>
         <p>Источник: ${this.source}</p>
-        <a class="btn btn-primary btn-lg" href="${this.link}" role="button">Читать в источнике</a>
-        <a class="btn btn-info btn-lg descr" href="${this.link}" role="button">Подробнее</a>
-      </div>`;
+        <a class="btn btn-primary btn-lg" href="${this.link}" role="button">Learn more</a>
+        <a class="btn btn-info btn-lg descr" href="${this.link}" role="button">Show more</a>`;
+        const modal = new Modal(this);
+        jumbotron.append(modal.render());
     return jumbotron;
   }
 }
