@@ -32,6 +32,7 @@ export default () => {
       const source = document.querySelector('channel title');
       const newItems = Array.from(items).map(item => new RSSItem(item, source));
       state.items = [...state.items, ...newItems].sort((a, b) =>  b.pubDate - a.pubDate);
+      state.lastUpdate = state.items[0].pubDate;
     });
   };
 
@@ -43,17 +44,19 @@ export default () => {
       const document = parser.parseFromString(res.data, 'application/xml');
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
+      source.innerHTML = 'new';
       const newItems = Array.from(items)
-        .filter(item => {
-        const itemDate = new Date(item.querySelector('pubDate').innerHTML);
-        return itemDate > state.lastUpdate;
-        })
-        .map(item => new RSSItem(item, source));
-      state.items = [...state.items, ...newItems].sort((a, b) =>  b.pubDate - a.pubDate);
+        .map(item => new RSSItem(item, source))
+        .filter(item => item.pubDate > state.lastUpdate)
+        .sort((a, b) =>  b.pubDate - a.pubDate);
+      //alert(`Old length: ${state.items.length}, add length: ${newItems.length}`);
+      state.items = [...newItems, ...state.items];
+      //alert(`NEw length: ${state.items.length}`);
+      state.lastUpdate = state.items[0].pubDate;
     });
   };
 
-  setInterval(update, 5000, state);
+  setTimeout(update, 7000, state);
 
   input.addEventListener('change', () => {
     state.input = input.value;
