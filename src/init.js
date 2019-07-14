@@ -16,7 +16,7 @@ export default () => {
   const container = document.querySelector('#mount');
   const input = document.querySelector('#basic-url');
   const info = document.querySelector('#info');
-  
+
   WatchJS.watch(state, 'items', () => {
     const { items } = state;
     items.map(item => container.append(item.render()));
@@ -35,20 +35,25 @@ export default () => {
     });
   };
 
-  const update = () => {
-    const url = this.state.sources[0];
+  const update = (state) => {
+    if (state.sources.length === 0) return;
+    const url = state.sources[0];
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
       const parser = new DOMParser();
       const document = parser.parseFromString(res.data, 'application/xml');
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
-      const newItems = Array.from(items).filter(item => {
+      const newItems = Array.from(items)
+        .filter(item => {
         const itemDate = new Date(item.querySelector('pubDate').innerHTML);
-        return itemDate > this.state.lastUpdate;
-      });
-
+        return itemDate > state.lastUpdate;
+        })
+        .map(item => new RSSItem(item, source));
+      state.items = [...state.items, ...newItems].sort((a, b) =>  b.pubDate - a.pubDate);
     });
   };
+
+  setInterval(update, 5000, state);
 
   input.addEventListener('change', () => {
     state.input = input.value;
