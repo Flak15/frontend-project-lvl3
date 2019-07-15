@@ -9,6 +9,7 @@ export default () => {
     inputValue: '',
     sources: [],
     items: [],
+    newItems:[],
     lastUpdate: 0,
   };
 
@@ -17,9 +18,12 @@ export default () => {
   const input = document.querySelector('#basic-url');
   const info = document.querySelector('#info');
 
-  WatchJS.watch(state, 'items', () => {
-    const { items } = state;
-    items.map(item => container.append(item.render()));
+  WatchJS.watch(state, 'newItems', () => {
+    const { items, newItems } = state;
+    alert(`Length: ${newItems.length}, last update: ${state.lastUpdate}`);
+    newItems.slice().sort((a, b) =>  b.pubDate - a.pubDate).map(item => container.append(item.render()));
+    items = [...items, ...newItems];
+    state.lastUpdate = items[0].pubDate;
   });
 
   const addNewSource = (url) => {
@@ -31,8 +35,7 @@ export default () => {
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
       const newItems = Array.from(items).map(item => new RSSItem(item, source));
-      state.items = [...state.items, ...newItems].sort((a, b) =>  b.pubDate - a.pubDate);
-      state.lastUpdate = state.items[0].pubDate;
+      state.newItems = newItems;
     });
   };
 
@@ -47,16 +50,15 @@ export default () => {
       source.innerHTML = 'new';
       const newItems = Array.from(items)
         .map(item => new RSSItem(item, source))
-        .filter(item => item.pubDate > state.lastUpdate)
-        .sort((a, b) =>  b.pubDate - a.pubDate);
+        .filter(item => item.pubDate > state.lastUpdate);
       //alert(`Old length: ${state.items.length}, add length: ${newItems.length}`);
-      state.items = [...newItems, ...state.items];
+      state.newItems = newItems;
       //alert(`NEw length: ${state.items.length}`);
-      state.lastUpdate = state.items[0].pubDate;
+
     });
   };
 
-  setTimeout(update, 7000, state);
+  setInterval(update, 7000, state);
 
   input.addEventListener('change', () => {
     state.input = input.value;
