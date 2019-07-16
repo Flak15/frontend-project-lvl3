@@ -20,18 +20,26 @@ export default () => {
 
   WatchJS.watch(state, 'newItems', () => {
     const { items, newItems } = state;
-    alert(`Length: ${newItems.length}, last update: ${state.lastUpdate}`);
-    newItems.slice().sort((a, b) =>  b.pubDate - a.pubDate).map(item => container.append(item.render()));
-    items = [...items, ...newItems];
-    state.lastUpdate = items[0].pubDate;
+    newItems.slice().sort((a, b) => a.pubDate - b.pubDate).map(item => container.prepend(item.render()));
+    state.items = [...newItems, ...items];
+    state.lastUpdate = state.items[0].pubDate;
   });
+
+  const getRSSFeed = url => {
+    return axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
+      const parser = new DOMParser();
+      return parser.parseFromString(res.data, 'application/xml');
+    })
+  };
 
   const addNewSource = (url) => {
     state.sources = [...state.sources, url];
+    
+
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
-      info.innerHTML = '';
       const parser = new DOMParser();
       const document = parser.parseFromString(res.data, 'application/xml');
+      info.innerHTML = '';
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
       const newItems = Array.from(items).map(item => new RSSItem(item, source));
@@ -39,7 +47,7 @@ export default () => {
     });
   };
 
-  const update = (state) => {
+  const update = () => {
     if (state.sources.length === 0) return;
     const url = state.sources[0];
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
@@ -51,14 +59,15 @@ export default () => {
       const newItems = Array.from(items)
         .map(item => new RSSItem(item, source))
         .filter(item => item.pubDate > state.lastUpdate);
-      //alert(`Old length: ${state.items.length}, add length: ${newItems.length}`);
       state.newItems = newItems;
-      //alert(`NEw length: ${state.items.length}`);
-
     });
   };
 
-  setInterval(update, 7000, state);
+
+
+  //alert(getRSSFeed('http://lorem-rss.herokuapp.com/feed?unit=second&interval=4'));
+
+  setInterval(update, 5000);
 
   input.addEventListener('change', () => {
     state.input = input.value;
