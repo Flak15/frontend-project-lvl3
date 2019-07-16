@@ -34,33 +34,26 @@ export default () => {
 
   const addNewSource = (url) => {
     state.sources = [...state.sources, url];
-    
-
-    axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
-      const parser = new DOMParser();
-      const document = parser.parseFromString(res.data, 'application/xml');
-      info.innerHTML = '';
+    getRSSFeed(url).then(document => {
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
       const newItems = Array.from(items).map(item => new RSSItem(item, source));
       state.newItems = newItems;
+      info.innerHTML = '';
     });
   };
 
   const update = () => {
     if (state.sources.length === 0) return;
-    const url = state.sources[0];
-    axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
-      const parser = new DOMParser();
-      const document = parser.parseFromString(res.data, 'application/xml');
+    const feeds = state.sources.map(source => getRSSFeed(source));
+    Promise.all(feeds).then(feeds => feeds.map(document => {
       const items = document.querySelectorAll('item');
       const source = document.querySelector('channel title');
-      source.innerHTML = 'new';
       const newItems = Array.from(items)
         .map(item => new RSSItem(item, source))
         .filter(item => item.pubDate > state.lastUpdate);
       state.newItems = newItems;
-    });
+    }));
   };
 
 
