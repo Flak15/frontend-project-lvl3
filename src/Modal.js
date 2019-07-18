@@ -9,7 +9,6 @@ export default class Modal {
   }
 
   render() {
-
     const modal = document.createElement('div');
     modal.innerHTML = `
       <button type="button" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#modal_${this.id}">
@@ -35,7 +34,7 @@ export default class Modal {
           </div>
         </div>
       </div>
-    </div>`
+    </div>`;
     return modal;
   }
 }
