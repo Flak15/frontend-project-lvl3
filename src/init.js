@@ -30,6 +30,7 @@ export default () => {
   };
 
   const addNewSource = (url) => {
+    info.innerHTML = 'Загрузка...';
     state.sources = [...state.sources, url];
     getRSSFeed(url).then((document) => {
       const newItems = getItems(document);
@@ -54,7 +55,6 @@ export default () => {
   });
 
   buttonAddSource.addEventListener('click', () => {
-    info.innerHTML = 'Загрузка...';
     addNewSource(state.inputValue);
     state.inputStatus = 'empty';
   });

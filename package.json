@@ -25,6 +25,7 @@
     "bootstrap": "^4.3.1",
     "lodash": "^4.17.14",
     "melanke-watchjs": "^1.5.0",
+    "nightmare": "^3.0.2",
     "validator": "^11.1.0"
   },
   "devDependencies": {
@@ -34,6 +35,7 @@
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.0.0",
     "babel-loader": "^8.0.5",
+    "babel-polyfill": "^6.26.0",
     "css-loader": "^3.0.0",
     "debug": "^4.1.1",
     "eslint": "^5.12.1",
