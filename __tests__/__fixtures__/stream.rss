@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?> <rss version="2.0" xml:base="http://www.nasa.gov/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/"> <channel> <title>Kepler News and Features</title>
+ <description>Kepler News and Features RSS</description>
+ <link>http://www.nasa.gov/</link>
+ <atom:link rel="self" href="http://www.nasa.gov/rss/dyn/mission_pages/kepler/news/kepler-newsandfeatures-RSS.rss" />
+ <language>en-us</language>
+ <webMaster>brian.dunbar@nasa.gov</webMaster>
+ <item> <title>Discovery Alert: A Third Planet in Kepler-47 System</title>
+ <link>http://www.nasa.gov/feature/discovery-alert-a-third-planet-in-kepler-47-system</link>
+ <description>Astronomers have discovered a third planet in the Kepler-47 system, securing the system’s title as the most interesting of the binary-star worlds.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/1568_kepler_planetlineup1280.jpg?itok=q1VY1ogX" length="119860" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/feature/discovery-alert-a-third-planet-in-kepler-47-system</guid>
+ <pubDate>Wed, 17 Apr 2019 13:51 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/mission_pages/kepler/news/kepler-newsandfeatures-RSS.rss">Kepler News and Features</source>
+</item>
+ <item> <title>High School Senior Uncovers Potential for Hundreds of Earth-Like Planets in Kepler Data</title>
+ <link>http://www.nasa.gov/feature/high-school-senior-uncovers-potential-for-hundreds-of-earth-like-planets-in-kepler-data</link>
+ <description>An 18-year-old high school senior has won a $250,000 prize for calculating the potential for finding more planets outside our solar system, called exoplanets, using data from NASA’s Kepler space telescope.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/humphrey_ana_poster_photo.jpg?itok=soyND8va" length="14101281" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/feature/high-school-senior-uncovers-potential-for-hundreds-of-earth-like-planets-in-kepler-data</guid>
+ <pubDate>Thu, 28 Mar 2019 14:00 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/mission_pages/kepler/news/kepler-newsandfeatures-RSS.rss">Kepler News and Features</source>
+</item>
+</channel>
+</rss>
