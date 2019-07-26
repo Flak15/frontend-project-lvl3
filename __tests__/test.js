@@ -1,14 +1,13 @@
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import Nightmare from 'nightmare';
 import init from '../src/init';
-
-
-
+import timer from 'timer-promise';
 
 beforeEach(() => {
   const pathToHtml = path.resolve(__dirname, '__fixtures__/index.html');
-  fs.readFile(pathToHtml, 'utf8').then(res => document.body.innerHTML = res);
+  const res = fs.readFileSync(pathToHtml, 'utf8');
+  document.documentElement.innerHTML = res;
   init();
 });
 
@@ -26,18 +25,16 @@ beforeEach(() => {
 //
 //
 // });
-test('duckduckgo', () => {
+test('test', () => {
 
+  expect(document.body.innerHTML).toMatchSnapshot();
+  const input = document.querySelector('#basic-url');
+  const button = document.querySelector('#add');
+  input.value = 'https://raw.githubusercontent.com/Flak15/frontend-project-lvl3/master/__tests__/__fixtures__/stream.rss';
+  button.disabled = false;
+  button.click();
+  timer.start(100).then(() => expect(setInterval(() => document.body.innerHTML, 3000)).toMatchSnapshot());
+  //setInterval( , 3000);
 
-  const nightmare = new Nightmare();
-
-
-
-        // your actual testing urls will likely be `http://localhost:port/path`
-        nightmare.goto('ttps://localhost:8080')
-          .end()
-          .then(function (result) { done() })
-          .catch(done)
-      
 
 });
