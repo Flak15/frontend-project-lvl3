@@ -25,16 +25,16 @@ beforeEach(() => {
 //
 //
 // });
-test('test', () => {
-
-  expect(document.body.innerHTML).toMatchSnapshot();
-  const input = document.querySelector('#basic-url');
-  const button = document.querySelector('#add');
-  input.value = 'https://raw.githubusercontent.com/Flak15/frontend-project-lvl3/master/__tests__/__fixtures__/stream.rss';
-  button.disabled = false;
-  button.click();
-  timer.start(100).then(() => expect(setInterval(() => document.body.innerHTML, 3000)).toMatchSnapshot());
-  //setInterval( , 3000);
+// test('test', () => {
+//
+//   expect(document.body.innerHTML).toMatchSnapshot();
+//   const input = document.querySelector('#basic-url');
+//   const button = document.querySelector('#add');
+//   input.value = 'https://raw.githubusercontent.com/Flak15/frontend-project-lvl3/master/__tests__/__fixtures__/stream.rss';
+//   button.disabled = false;
+//   button.click();
+//   timer.start(100).then(() => expect(setInterval(() => document.body.innerHTML, 3000)).toMatchSnapshot());
+  // setInterval( , 3000);
 
 
 });
