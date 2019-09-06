@@ -11,6 +11,7 @@ export default () => {
     newItems: [],
     lastUpdate: 0,
     inputStatus: 'empty',
+    info: '',
   };
 
   const buttonAddSource = document.querySelector('#add');
@@ -19,7 +20,7 @@ export default () => {
   const info = document.querySelector('#info');
 
   const getRSSFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
-    const parser = new DOMParser();
+    const parser = new DOMParser(); ///////////////////
     return parser.parseFromString(res.data, 'application/xml');
   });
 
@@ -35,7 +36,7 @@ export default () => {
     getRSSFeed(url).then((document) => {
       const newItems = getItems(document);
       state.newItems = newItems;
-      info.innerHTML = '';
+      info.innerHTML = ''; ///////////////////
     });
   };
 
