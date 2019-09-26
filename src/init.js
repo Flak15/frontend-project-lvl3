@@ -11,51 +11,61 @@ export default () => {
     newItems: [],
     lastUpdate: 0,
     inputStatus: 'empty',
-    info: '',
+    info: 'empty',
+    update: 'updated',
   };
 
+  const inputForm = document.querySelector('#rssInputAddressForm');
   const buttonAddSource = document.querySelector('#add');
   const container = document.querySelector('#mount');
   const input = document.querySelector('#basic-url');
   const info = document.querySelector('#info');
 
-  const getRSSFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then((res) => {
-    const parser = new DOMParser(); ///////////////////
-    return parser.parseFromString(res.data, 'application/xml');
-  });
+  const getRSSFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then(res => res.data);
 
-  const getItems = (xmlDoc) => {
+  const parseRSS = (rssString) => {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(rssString, 'application/xml');
     const items = xmlDoc.querySelectorAll('item');
     const source = xmlDoc.querySelector('channel title');
     return Array.from(items).map(item => new RSSItem(item, source));
   };
 
   const addNewSource = (url) => {
-    info.innerHTML = 'Загрузка...';
+    state.info = 'loading';
     state.sources = [...state.sources, url];
-    getRSSFeed(url).then((document) => {
-      const newItems = getItems(document);
+    getRSSFeed(url).then((rss) => {
+      const newItems = parseRSS(rss);
       state.newItems = newItems;
-      info.innerHTML = ''; ///////////////////
+      state.info = 'empty';
     });
   };
 
   const updateItems = () => {
     if (state.sources.length === 0) return;
     const feeds = state.sources.map(source => getRSSFeed(source));
-    Promise.all(feeds).then(docs => docs.map((document) => {
-      const newItems = getItems(document).filter(item => item.pubDate > state.lastUpdate);
-      state.newItems = newItems;
-      return null;
-    }));
+    Promise.all(feeds).then((rssFeeds) => {
+      rssFeeds.map((rss) => {
+        state.newItems = parseRSS(rss).filter(item => item.pubDate > state.lastUpdate);
+        return null;
+      });
+      state.update = 'updated';
+    });
   };
 
   input.addEventListener('change', () => {
     state.inputValue = input.value;
-    state.inputStatus = validator.isURL(state.inputValue) && !state.sources.includes(state.inputValue) ? 'valid' : 'invalid';
+    if (validator.isURL(state.inputValue) && !state.sources.includes(state.inputValue)) {
+      state.inputStatus = 'valid';
+      state.info = 'empty';
+    } else {
+      state.inputStatus = 'invalid';
+      state.info = 'wrongURL';
+    }
   });
 
-  buttonAddSource.addEventListener('click', () => {
+  inputForm.addEventListener('submit', (e) => {
+    e.preventDefault();
     addNewSource(state.inputValue);
     state.inputStatus = 'empty';
   });
@@ -95,5 +105,25 @@ export default () => {
     inputStatusHandlers[state.inputStatus]();
   });
 
-  setInterval(updateItems, 5000);
+  WatchJS.watch(state, 'info', () => {
+    const infoStatusHandlers = {
+      wrongURL() {
+        info.innerHTML = 'Некорректный адрес RSS';
+      },
+      loading() {
+        info.innerHTML = 'Загрузка...';
+      },
+      empty() {
+        info.innerHTML = '';
+      },
+    };
+    infoStatusHandlers[state.info]();
+  });
+
+  setInterval(() => {
+    if (state.update === 'update') {
+      state.update = 'updating';
+      updateItems();
+    }
+  }, 5000);
 };
