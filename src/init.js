@@ -12,7 +12,7 @@ export default () => {
     lastUpdate: 0,
     inputStatus: 'empty',
     info: 'empty',
-    update: 'updated',
+    update: 'empty',
   };
 
   const inputForm = document.querySelector('#rssInputAddressForm');
@@ -32,7 +32,6 @@ export default () => {
   };
 
   const addNewSource = (url) => {
-    state.info = 'loading';
     state.sources = [...state.sources, url];
     getRSSFeed(url).then((rss) => {
       const newItems = parseRSS(rss);
@@ -45,9 +44,8 @@ export default () => {
     if (state.sources.length === 0) return;
     const feeds = state.sources.map(source => getRSSFeed(source));
     Promise.all(feeds).then((rssFeeds) => {
-      rssFeeds.map((rss) => {
+      rssFeeds.forEach((rss) => {
         state.newItems = parseRSS(rss).filter(item => item.pubDate > state.lastUpdate);
-        return null;
       });
       state.update = 'updated';
     });
@@ -66,8 +64,10 @@ export default () => {
 
   inputForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    state.info = 'loading';
     addNewSource(state.inputValue);
     state.inputStatus = 'empty';
+    state.update = 'updated';
   });
 
   WatchJS.watch(state, 'newItems', () => {
@@ -121,7 +121,7 @@ export default () => {
   });
 
   setInterval(() => {
-    if (state.update === 'update') {
+    if (state.update === 'updated') {
       state.update = 'updating';
       updateItems();
     }
