@@ -17,7 +17,6 @@ export default class RSSItem {
     jumbotron.classList.add('jumbotron');
     jumbotron.innerHTML = `
         <h1 class="display-4">${this.title}</h1>
-
         <hr class="my-4">
         <p>${this.pubDate.getDate()} ${monthNames[this.pubDate.getMonth()]} ${this.pubDate.getFullYear()}</p>
         <p>Источник: ${this.source}</p>`;

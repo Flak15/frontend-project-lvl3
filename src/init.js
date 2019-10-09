@@ -20,23 +20,26 @@ export default () => {
   const container = document.querySelector('#mount');
   const input = document.querySelector('#basic-url');
   const info = document.querySelector('#info');
+  const parser = new DOMParser();
 
   const getRSSFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then(res => res.data);
 
-  const parseRSS = (rssString) => {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(rssString, 'application/xml');
+  const parseRSS = rssString => parser.parseFromString(rssString, 'application/xml');
+
+  const getRSSItems = (xmlDoc) => {
     const items = xmlDoc.querySelectorAll('item');
     const source = xmlDoc.querySelector('channel title');
     return Array.from(items).map(item => new RSSItem(item, source));
-  };
+  }
 
   const addNewSource = (url) => {
     state.sources = [...state.sources, url];
     getRSSFeed(url).then((rss) => {
-      const newItems = parseRSS(rss);
+      const xmlDoc = parseRSS(rss);
+      const newItems = getRSSItems(xmlDoc);
       state.newItems = newItems;
       state.info = 'empty';
+      state.update = 'updated';
     });
   };
 
@@ -45,7 +48,8 @@ export default () => {
     const feeds = state.sources.map(source => getRSSFeed(source));
     Promise.all(feeds).then((rssFeeds) => {
       rssFeeds.forEach((rss) => {
-        state.newItems = parseRSS(rss).filter(item => item.pubDate > state.lastUpdate);
+        const xmlDoc = parseRSS(rss);
+        state.newItems = getRSSItems(xmlDoc).filter(item => item.pubDate > state.lastUpdate);
       });
       state.update = 'updated';
     });
@@ -67,7 +71,6 @@ export default () => {
     state.info = 'loading';
     addNewSource(state.inputValue);
     state.inputStatus = 'empty';
-    state.update = 'updated';
   });
 
   WatchJS.watch(state, 'newItems', () => {
