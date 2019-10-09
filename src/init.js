@@ -30,7 +30,7 @@ export default () => {
     const items = xmlDoc.querySelectorAll('item');
     const source = xmlDoc.querySelector('channel title');
     return Array.from(items).map(item => new RSSItem(item, source));
-  }
+  };
 
   const addNewSource = (url) => {
     state.sources = [...state.sources, url];
