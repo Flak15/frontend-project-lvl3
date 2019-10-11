@@ -12,7 +12,6 @@ export default () => {
     lastUpdate: 0,
     inputStatus: 'empty',
     info: 'empty',
-    update: 'empty',
   };
 
   const inputForm = document.querySelector('#rssInputAddressForm');
@@ -32,17 +31,6 @@ export default () => {
     return Array.from(items).map(item => new RSSItem(item, source));
   };
 
-  const addNewSource = (url) => {
-    state.sources = [...state.sources, url];
-    getRSSFeed(url).then((rss) => {
-      const xmlDoc = parseRSS(rss);
-      const newItems = getRSSItems(xmlDoc);
-      state.newItems = newItems;
-      state.info = 'empty';
-      state.update = 'updated';
-    });
-  };
-
   const updateItems = () => {
     if (state.sources.length === 0) return;
     const feeds = state.sources.map(source => getRSSFeed(source));
@@ -51,8 +39,17 @@ export default () => {
         const xmlDoc = parseRSS(rss);
         state.newItems = getRSSItems(xmlDoc).filter(item => item.pubDate > state.lastUpdate);
       });
-      state.update = 'updated';
-    });
+    }).then(() => setTimeout(updateItems, 5000));
+  };
+
+  const addNewSource = (url) => {
+    state.sources = [...state.sources, url];
+    getRSSFeed(url).then((rss) => {
+      const xmlDoc = parseRSS(rss);
+      const newItems = getRSSItems(xmlDoc);
+      state.newItems = newItems;
+      state.info = 'empty';
+    }).then(() => setTimeout(updateItems, 5000));
   };
 
   input.addEventListener('change', () => {
@@ -122,11 +119,4 @@ export default () => {
     };
     infoStatusHandlers[state.info]();
   });
-
-  setInterval(() => {
-    if (state.update === 'updated') {
-      state.update = 'updating';
-      updateItems();
-    }
-  }, 5000);
 };
