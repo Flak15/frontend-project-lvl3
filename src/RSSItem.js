@@ -1,5 +1,6 @@
-// import Modal from './Modal';
 import _ from 'lodash';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 const parseXMLTextElement = el => Array.from(el.childNodes).map(child => child.nodeValue).join('');
 
@@ -43,15 +44,13 @@ export default class RSSItem {
   }
 
   render() {
-    const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декбря'];
     const card = document.createElement('div');
     card.classList.add('card');
-    // const modal = new Modal(this);
     card.innerHTML = `
       <div class="card-body">
         <h5 class="card-title">${this.title}</h5>
         <hr class="my-4">
-        <p class="card-text">${this.pubDate.getDate()} ${monthNames[this.pubDate.getMonth()]} ${this.pubDate.getFullYear()}</p>
+        <p class="card-text">${format(this.pubDate, 'dd MMMM yyyy', { locale: ru })}</p>
         <p class="card-text">Источник: ${this.source}</p>
         ${this.getModal(this)}
       </div>`;
