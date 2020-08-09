@@ -52,7 +52,7 @@ export default () => {
     }).then(() => setTimeout(updateItems, 5000));
   };
 
-  input.addEventListener('change', () => {
+  input.addEventListener('change', () => {https://github.com/Flak15/frontend-project-lvl3.git
     state.inputValue = input.value;
     if (validator.isURL(state.inputValue) && !state.sources.includes(state.inputValue)) {
       state.inputStatus = 'valid';
