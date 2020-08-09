@@ -6,8 +6,9 @@ import i18next from 'i18next';
 export default () => {
 	const state = {
 		inputValue: '',
+		inputState: 'idle',
 		urls: [],
-		schema:  yup.object().shape({ url: yup.string().url().notOneOf(state.urls).required() }),
+		schema:  yup.object().shape({ url: yup.string().url().required() }),
 	};
 	const elements = {
 		input: document.querySelector('#basic-url'),
@@ -18,23 +19,30 @@ export default () => {
 	};
 	const getSchema = () => yup.object().shape({ url: yup.string().url().notOneOf(state.urls).required() });
 	const watchedState = onChange(state, (path, value, prevValue) => {
-
+		if (path === 'inputState') {
+			elements.infoContainer.innerHtml = state.inputState;
+		}
 	});
 	elements.form.addEventListener('submit', (e) => {
 		e.preventDefault();
-		// alert(watchedState.inputValue);
-		getSchema().isValid({ url: state.inputValue })
-			.then((valid) => {
-				alert('Is valid: ' + valid);
-				if (valid) {
-					watchedState.urls.push(watchedState.inputValue);
-					console.log(watchedState.urls);
-				}
-			});
+		if (state.inputState === 'valid') {
+			watchedState.urls.push(watchedState.inputValue);
+			watchedState.schema = getSchema();
+			// alert(watchedState.inputValue);
+			watchedState.inputState = 'idle';
+		}
+		
+		
 	});
 	elements.input.addEventListener('input', (e) => {
 		e.preventDefault();
 		watchedState.inputValue = e.target.value;
-		state.schema 
+		state.schema.isValid({ url: e.target.value }).then((valid) => {
+			if (valid) {
+				watchedState.inputState = 'valid';
+			} else {
+				watchedState.inputState = 'invalid';
+			}
+		})
 	});
 };
