@@ -9,40 +9,61 @@ export default () => {
 		inputState: 'idle',
 		urls: [],
 		schema:  yup.object().shape({ url: yup.string().url().required() }),
+		errors: []
 	};
 	const elements = {
 		input: document.querySelector('#basic-url'),
 		button: document.querySelector('#add'),
 		mountContainer: document.querySelector('#mount'),
-		infoContainer: document.querySelector('#info'),
+		feedBackContainer: document.querySelector('#invalid-feedback'),
 		form: document.querySelector('#rssInputAddressForm'),
 	};
+	const watcherSelector = {
+		inputState(value) {
+			elements.feedBackContainer.innerHTML = value;
+			if (value === 'invalid') {
+				elements.feedBackContainer.innerHTML = state.errors.join(', ');
+			}
+		},
+		inputValue() {},
+		urls() {
+
+		},
+		inputState() {
+
+		},
+		errors() {
+
+		},
+		schema() {
+
+		}
+	};
+
 	const getSchema = () => yup.object().shape({ url: yup.string().url().notOneOf(state.urls).required() });
 	const watchedState = onChange(state, (path, value, prevValue) => {
-		if (path === 'inputState') {
-			elements.infoContainer.innerHtml = state.inputState;
-		}
+		console.log(path);
+		watcherSelector[path](value, prevValue);
 	});
 	elements.form.addEventListener('submit', (e) => {
 		e.preventDefault();
 		if (state.inputState === 'valid') {
 			watchedState.urls.push(watchedState.inputValue);
 			watchedState.schema = getSchema();
-			// alert(watchedState.inputValue);
 			watchedState.inputState = 'idle';
 		}
-		
-		
 	});
 	elements.input.addEventListener('input', (e) => {
 		e.preventDefault();
 		watchedState.inputValue = e.target.value;
-		state.schema.isValid({ url: e.target.value }).then((valid) => {
-			if (valid) {
-				watchedState.inputState = 'valid';
-			} else {
+		state.schema.validate({ url: e.target.value })
+			.then(() => watchedState.inputState = 'valid')
+			.catch(err => {
+				watchedState.errors = err.errors;
 				watchedState.inputState = 'invalid';
-			}
-		})
+				
+				
+			});
+
 	});
 };
