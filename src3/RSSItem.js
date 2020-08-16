@@ -20,7 +20,6 @@ export default class RSSItem {
       <button type="button" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#modal_${this.id}">
         Подробнее
       </button>
-
       <div class="modal fade" id="modal_${this.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
