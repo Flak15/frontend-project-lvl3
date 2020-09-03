@@ -66,38 +66,9 @@ const getNewPosts = (xmlDoc, source) => {
 	});
 	return _.compact(newItems);
 };
-const getSchema = sources => yup.object()
+export const getSchema = sources => yup.object()
 	.shape({ url: yup.string().url().notOneOf(sources.map(source => source.url)).required() });
 
-const updatePosts = (state, watchedState) => {
-	console.log('Update', new Date());
-	if (state.sources.length === 0) {
-		setTimeout(() => updatePosts(state, watchedState), 5000);
-		return;
-	}
-	const newPostPromises = state.sources.map(source => getRssFeed(source.url)
-		.then((rssString) => {
-			const xmlDoc = parseRss(rssString);
-			const newPosts = getNewPosts(xmlDoc, source);
-			const { sources } = watchedState;
-			sources.find(src => src.id === source.id).updateDate = new Date();
-			return newPosts;
-		}).catch(e => console.log('error: ', e)));
-	Promise.all(newPostPromises).then((postsArrays) => {
-		postsArrays.forEach((newPosts) => {
-			watchedState.posts = [...state.posts, ...newPosts];
-		});
-	}).then(() => setTimeout(() => updatePosts(state, watchedState), 5000))
-		.catch(err => console.log('Error during update posts: ', err));
-};
-export const closeBtnListener = (closeBtn, state, watchedState) => {
-	closeBtn.addEventListener('click', (e) => {
-		const btn = e.target.closest('.close');
-		watchedState.sources = state.sources.filter(source => source.id !== btn.id);
-		watchedState.posts = state.posts.filter(post => post.sourceId !== btn.id);
-		watchedState.schema = getSchema(state.sources);
-	});
-};
 const app = () => {
 	const state = {
 		inputValue: '',
@@ -138,6 +109,27 @@ const app = () => {
 	});
 	const watchedState = onChange(state, (path, value) => getWatcher(path, value,
 		elements, state, watchedState));
+	const updatePosts = () => {
+		console.log('Update', new Date());
+		if (state.sources.length === 0) {
+			setTimeout(() => updatePosts(), 5000);
+			return;
+		}
+		const newPostPromises = state.sources.map(source => getRssFeed(source.url)
+			.then((rssString) => {
+				const xmlDoc = parseRss(rssString);
+				const newPosts = getNewPosts(xmlDoc, source);
+				const { sources } = watchedState;
+				sources.find(src => src.id === source.id).updateDate = new Date();
+				return newPosts;
+			}).catch(e => console.log('error: ', e)));
+		Promise.all(newPostPromises).then((postsArrays) => {
+			postsArrays.forEach((newPosts) => {
+				watchedState.posts = [...state.posts, ...newPosts];
+			});
+		}).then(() => setTimeout(() => updatePosts(), 5000))
+			.catch(err => console.log('Error during update posts: ', err));
+	};
 	elements.form.addEventListener('submit', (e) => {
 		e.preventDefault();
 		if (state.inputState === 'valid') {
@@ -173,7 +165,7 @@ const app = () => {
 			});
 	});
 	window.addEventListener('DOMContentLoaded', () => {
-		setTimeout(() => updatePosts(state, watchedState), 5000);
+		setTimeout(() => updatePosts(), 5000);
 	});
 };
 

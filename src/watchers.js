@@ -1,11 +1,18 @@
-// import { state, elements} from './app';
-
-import { closeBtnListener, renderPosts } from './app';
+/* eslint-disable no-param-reassign */
+import { renderPosts, getSchema } from './app';
 
 export default (path, value, elements, state, watchedState) => {
 	const {
 		input, button, feedBackContainer, sourceList,
 	} = elements;
+	const closeBtnListener = (closeBtn) => {
+		closeBtn.addEventListener('click', (e) => {
+			const btn = e.target.closest('.close');
+			watchedState.sources = state.sources.filter(source => source.id !== btn.id);
+			watchedState.posts = state.posts.filter(post => post.sourceId !== btn.id);
+			watchedState.schema = getSchema(state.sources);
+		});
+	};
 	if (path === 'inputState') {
 		if (value === 'valid') {
 			input.classList.remove('is-invalid');
