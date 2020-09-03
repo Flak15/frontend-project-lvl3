@@ -119,8 +119,7 @@ const app = () => {
 			.then((rssString) => {
 				const xmlDoc = parseRss(rssString);
 				const newPosts = getNewPosts(xmlDoc, source);
-				const { sources } = watchedState;
-				sources.find(src => src.id === source.id).updateDate = new Date();
+				watchedState.sources.find(src => src.id === source.id).updateDate = new Date();
 				return newPosts;
 			}).catch(e => console.log('error: ', e)));
 		Promise.all(newPostPromises).then((postsArrays) => {

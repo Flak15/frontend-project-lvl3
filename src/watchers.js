@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { renderPosts, getSchema } from './app';
 
 export default (path, value, elements, state, watchedState) => {
