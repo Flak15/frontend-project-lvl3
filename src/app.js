@@ -5,14 +5,14 @@ import i18next from 'i18next';
 import _ from 'lodash';
 import ru from './locales/ru';
 import getWatcher from './watchers';
-/** 
+/**
  * 1. Add internationalization - DONE
  * 2. Add sources list with deletion -DONE
  * 3. Fix layout
  * 4. Error proccessing
  * 5. Add waiting circe while 'loading'
  * 6. Pictures in posts
- * */ 
+ * */
 const getRssFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then(res => res.data);
 const parseRss = rawRssString => (new DOMParser()).parseFromString(rawRssString, 'application/xml');
 const parseItem = (xmlItem, sourceId) => ({
@@ -27,9 +27,10 @@ const getRssItems = (xmlDoc, sourceId) => {
 	const items = xmlDoc.querySelectorAll('item');
 	return Array.from(items).map(item => parseItem(item, sourceId));
 };
-export const renderPosts = (state) => {
-	elements.mountContainer.innerHTML = '';
-	const {posts} = state;
+export const renderPosts = (state, elements) => {
+	const { mountContainer: container } = elements;
+	const { posts } = state;
+	container.innerHTML = '';
 	posts.sort((a, b) => b.pubDate - a.pubDate).forEach((post) => {
 		const div = document.createElement('div');
 		div.classList.add('card');
@@ -43,7 +44,7 @@ export const renderPosts = (state) => {
 				<p class="card-text">${i18next.t('date', { date: post.pubDate, language: i18next.language })}</p>
 				<p class="card-text">${i18next.t('source')}: ${state.sources.find(source => source.id === post.sourceId).name}</p>
 			</div>`;
-		elements.mountContainer.appendChild(div);
+		container.appendChild(div);
 	});
 };
 
@@ -67,26 +68,29 @@ const getNewPosts = (xmlDoc, source) => {
 };
 const getSchema = sources => yup.object()
 	.shape({ url: yup.string().url().notOneOf(sources.map(source => source.url)).required() });
-const updatePosts = (state) => {
+
+const updatePosts = (state, watchedState) => {
 	console.log('Update', new Date());
 	if (state.sources.length === 0) {
-		setTimeout(updatePosts, 5000);
+		setTimeout(() => updatePosts(state, watchedState), 5000);
 		return;
 	}
 	const newPostPromises = state.sources.map(source => getRssFeed(source.url)
 		.then((rssString) => {
 			const xmlDoc = parseRss(rssString);
 			const newPosts = getNewPosts(xmlDoc, source);
-			watchedState.sources.find(src => src.id === source.id).updateDate = new Date();
+			const { sources } = watchedState;
+			sources.find(src => src.id === source.id).updateDate = new Date();
 			return newPosts;
 		}).catch(e => console.log('error: ', e)));
 	Promise.all(newPostPromises).then((postsArrays) => {
 		postsArrays.forEach((newPosts) => {
-			watchedState.posts = _.union(state.posts, newPosts);
+			watchedState.posts = [...state.posts, ...newPosts];
 		});
-	}).then(() => setTimeout(() => updatePosts(state), 5000));
+	}).then(() => setTimeout(() => updatePosts(state, watchedState), 5000))
+		.catch(err => console.log('Error during update posts: ', err));
 };
-export const closeBtnListener = (closeBtn) => {
+export const closeBtnListener = (closeBtn, state, watchedState) => {
 	closeBtn.addEventListener('click', (e) => {
 		const btn = e.target.closest('.close');
 		watchedState.sources = state.sources.filter(source => source.id !== btn.id);
@@ -94,8 +98,8 @@ export const closeBtnListener = (closeBtn) => {
 		watchedState.schema = getSchema(state.sources);
 	});
 };
-export default () => {
-	 const state = {
+const app = () => {
+	const state = {
 		inputValue: '',
 		inputState: 'idle',
 		sources: [],
@@ -103,7 +107,7 @@ export default () => {
 		schema: yup.object().shape({ url: yup.string().url().required() }),
 		errors: [],
 	};
-	 const elements = {
+	const elements = {
 		input: document.querySelector('#basic-url'),
 		button: document.querySelector('#add'),
 		mountContainer: document.querySelector('#mount'),
@@ -132,7 +136,8 @@ export default () => {
 			},
 		},
 	});
-	const watchedState = onChange(state, getWatcher);
+	const watchedState = onChange(state, (path, value) => getWatcher(path, value,
+		elements, state, watchedState));
 	elements.form.addEventListener('submit', (e) => {
 		e.preventDefault();
 		if (state.inputState === 'valid') {
@@ -167,8 +172,9 @@ export default () => {
 				watchedState.inputState = 'invalid';
 			});
 	});
-	window.addEventListener('DOMContentLoaded', (event) => {
-		setTimeout(() => updatePosts(state), 5000);
+	window.addEventListener('DOMContentLoaded', () => {
+		setTimeout(() => updatePosts(state, watchedState), 5000);
 	});
-	
 };
+
+export default app;

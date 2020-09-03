@@ -1,63 +1,48 @@
-import { state, elements} from './app';
-import closeBtnListener from "./app";
-import {renderPosts} from './app'
+// import { state, elements} from './app';
 
-const selectWatcher = (path, value, prevValue, watchers) => {
+import { closeBtnListener, renderPosts } from './app';
+
+export default (path, value, elements, state, watchedState) => {
+	const {
+		input, button, feedBackContainer, sourceList,
+	} = elements;
 	if (path === 'inputState') {
-		watchers[path](value);
+		if (value === 'valid') {
+			input.classList.remove('is-invalid');
+			input.classList.add('is-valid');
+			button.disabled = false;
+		} else if (value === 'invalid') {
+			input.classList.add('is-invalid');
+			input.classList.remove('is-valid');
+			button.disabled = true;
+		} else if (value === 'idle') {
+			input.classList.remove('is-valid');
+			input.value = '';
+			input.disabled = false;
+			button.disabled = false;
+		} else if (value === 'loading') {
+			input.classList.remove('is-valid');
+			input.disabled = true;
+			button.disabled = true;
+		} else {
+			throw new Error('Unknown state: ', value);
+		}
 	} else if (path === 'sources') {
-		watchers[path](value, closeBtnListener);
+		sourceList.innerHTML = '';
+		value.forEach((source) => {
+			const sourceElement = document.createElement('div');
+			sourceElement.classList.add('mb-3');
+			sourceElement.innerHTML = `
+				<button type="button" class="close" aria-label="Close" id="${source.id}">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<div>${source.name}</div>`;
+			elements.sourceList.appendChild(sourceElement);
+		});
+		document.querySelectorAll('button.close').forEach(closeBtn => closeBtnListener(closeBtn, state, watchedState));
 	} else if (path === 'errors') {
-		watchers[path](value);
+		feedBackContainer.innerHTML = value.join(', ');
 	} else if (path === 'posts') {
-		watchers[path](value);
+		renderPosts(state, elements);
 	}
 };
-
-export default (path, value, prevValue) => {
-	const watchers = {
-		inputState(value) {
-			if (value === 'valid') {
-				elements.input.classList.remove('is-invalid');
-				elements.input.classList.add('is-valid');
-				elements.button.disabled = false;
-			} else if (value === 'invalid') {
-				elements.input.classList.add('is-invalid');
-				elements.input.classList.remove('is-valid');
-				elements.button.disabled = true;
-			} else if (value === 'idle') {
-				elements.input.classList.remove('is-valid');
-				elements.input.value = '';
-				elements.input.disabled = false;
-				elements.button.disabled = false;
-			} else if (value === 'loading') {
-				elements.input.classList.remove('is-valid');
-				elements.input.disabled = true;
-				elements.button.disabled = true;
-			} else {
-				throw new Error('Unknown state: ', value);
-			}
-		},
-		sources(value, closeBtnListener) {
-			elements.sourceList.innerHTML = '';
-			value.forEach((source) => {
-				const div = document.createElement('div');
-				div.classList.add('mb-3');
-				div.innerHTML = `
-					<button type="button" class="close" aria-label="Close" id="${source.id}">
-						<span aria-hidden="true">&times;</span>
-					</button>
-					<div>${source.name}</div>`;
-				elements.sourceList.appendChild(div);
-			});
-			document.querySelectorAll('.close').forEach(closeBtnListener);
-		},
-		errors(value) {
-			elements.feedBackContainer.innerHTML = value.join(', ');
-		},
-		posts() {
-			renderPosts(state);
-		},
-	};
-	return selectWatcher(path, value, prevValue, watchers);
-}
