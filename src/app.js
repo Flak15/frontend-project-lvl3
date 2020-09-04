@@ -4,15 +4,8 @@ import axios from 'axios';
 import i18next from 'i18next';
 import _ from 'lodash';
 import ru from './locales/ru';
-import getWatcher from './watchers';
-/**
- * 1. Add internationalization - DONE
- * 2. Add sources list with deletion -DONE
- * 3. Fix layout
- * 4. Error proccessing
- * 5. Add waiting circe while 'loading'
- * 6. Pictures in posts
- * */
+import watch from './watch';
+
 const getRssFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then(res => res.data);
 const parseRss = rawRssString => (new DOMParser()).parseFromString(rawRssString, 'application/xml');
 const parseItem = (xmlItem, sourceId) => ({
@@ -88,7 +81,6 @@ const app = () => {
 	};
 	i18next.init({
 		lng: 'ru',
-		debug: true,
 		resources: { ru },
 		interpolation: {
 			format(value, format) {
@@ -107,10 +99,9 @@ const app = () => {
 			},
 		},
 	});
-	const watchedState = onChange(state, (path, value) => getWatcher(path, value,
+	const watchedState = onChange(state, (path, value) => watch(path, value,
 		elements, state, watchedState));
 	const updatePosts = () => {
-		console.log('Update', new Date());
 		if (state.sources.length === 0) {
 			setTimeout(() => updatePosts(), 5000);
 			return;
@@ -127,7 +118,7 @@ const app = () => {
 				watchedState.posts = [...state.posts, ...newPosts];
 			});
 		}).then(() => setTimeout(() => updatePosts(), 5000))
-			.catch(err => console.log('Error during update posts: ', err));
+			.catch(err => console.log('Error while updating posts: ', err));
 	};
 	elements.form.addEventListener('submit', (e) => {
 		e.preventDefault();
@@ -146,7 +137,7 @@ const app = () => {
 				watchedState.inputState = 'idle';
 			}).catch((error) => {
 				watchedState.inputState = 'idle';
-				console.log('error: ', error);
+				console.log('Error while adding new rss: ', error);
 			});
 		}
 	});

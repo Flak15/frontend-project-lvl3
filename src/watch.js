@@ -1,17 +1,18 @@
 import { renderPosts, getSchema } from './app';
 
+const closeBtnListener = (closeBtn, state, watchedState) => {
+	closeBtn.addEventListener('click', (e) => {
+		const btn = e.target.closest('.close');
+		watchedState.sources = state.sources.filter(source => source.id !== btn.id);
+		watchedState.posts = state.posts.filter(post => post.sourceId !== btn.id);
+		watchedState.schema = getSchema(state.sources);
+	});
+};
+
 export default (path, value, elements, state, watchedState) => {
 	const {
 		input, button, feedBackContainer, sourceList,
 	} = elements;
-	const closeBtnListener = (closeBtn) => {
-		closeBtn.addEventListener('click', (e) => {
-			const btn = e.target.closest('.close');
-			watchedState.sources = state.sources.filter(source => source.id !== btn.id);
-			watchedState.posts = state.posts.filter(post => post.sourceId !== btn.id);
-			watchedState.schema = getSchema(state.sources);
-		});
-	};
 	if (path === 'inputState') {
 		if (value === 'valid') {
 			input.classList.remove('is-invalid');
@@ -43,7 +44,7 @@ export default (path, value, elements, state, watchedState) => {
 					<span aria-hidden="true">&times;</span>
 				</button>
 				<div>${source.name}</div>`;
-			elements.sourceList.appendChild(sourceElement);
+			sourceList.appendChild(sourceElement);
 		});
 		document.querySelectorAll('button.close').forEach(closeBtn => closeBtnListener(closeBtn, state, watchedState));
 	} else if (path === 'errors') {
