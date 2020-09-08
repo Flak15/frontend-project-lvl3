@@ -59,7 +59,7 @@ const getNewPosts = (xmlDoc, source) => {
   });
   return _.compact(newItems);
 };
-export const getSchema = sources => yup.object()
+const getSchema = sources => yup.object()
   .shape({ url: yup.string().url().notOneOf(sources.map(source => source.url)).required() });
 
 const app = () => {
