@@ -18,7 +18,3 @@ extends:
 rules:
   no-param-reassign: 0
   no-console: 0
-  no-tabs: 0
-  indent: 
-  - 'error'
-  - 'tab'
