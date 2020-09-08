@@ -7,7 +7,7 @@ import ru from './locales/ru';
 import watch from './watch';
 
 const getRssFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then(res => res.data);
-const parseRss = rawRssString => (new DOMParser()).parseFromString(rawRssString, 'application/xml');
+const getXmlDoc = rawRssString => (new DOMParser()).parseFromString(rawRssString, 'application/xml');
 const parseItem = (xmlItem, sourceId) => ({
   sourceId,
   title: xmlItem.querySelector('title').textContent,
@@ -68,7 +68,6 @@ const app = () => {
     inputState: 'idle',
     sources: [],
     posts: [],
-    schema: yup.object().shape({ url: yup.string().url().required() }),
     errors: [],
   };
   const elements = {
@@ -108,7 +107,7 @@ const app = () => {
     }
     const newPostPromises = state.sources.map(source => getRssFeed(source.url)
       .then((rssString) => {
-        const xmlDoc = parseRss(rssString);
+        const xmlDoc = getXmlDoc(rssString);
         const newPosts = getNewPosts(xmlDoc, source);
         watchedState.sources.find(src => src.id === source.id).updateDate = new Date();
         return newPosts;
@@ -127,11 +126,10 @@ const app = () => {
       const newSource = { id: _.uniqueId(), url: newUrl };
       watchedState.inputState = 'loading';
       getRssFeed(newUrl).then((rawRss) => {
-        const xmlDoc = parseRss(rawRss);
+        const xmlDoc = getXmlDoc(rawRss);
         newSource.name = xmlDoc.querySelector('channel title').textContent;
         newSource.updateDate = new Date();
         watchedState.sources = [...state.sources, newSource];
-        watchedState.schema = getSchema(state.sources);
         const newPosts = getRssItems(xmlDoc, newSource.id);
         watchedState.posts = [...state.posts, ...newPosts];
         watchedState.inputState = 'idle';
@@ -144,7 +142,7 @@ const app = () => {
   elements.input.addEventListener('input', (event) => {
     event.preventDefault();
     watchedState.inputValue = event.target.value;
-    state.schema.validate({ url: event.target.value })
+    getSchema(state.sources).validate({ url: event.target.value })
       .then(() => {
         watchedState.errors = [];
         watchedState.inputState = 'valid';
@@ -154,7 +152,7 @@ const app = () => {
         watchedState.inputState = 'invalid';
       });
   });
-  window.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => updatePosts(), 5000);
   });
 };

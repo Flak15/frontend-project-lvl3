@@ -5,7 +5,6 @@ const closeBtnListener = (closeBtn, state, watchedState) => {
     const btn = e.target.closest('.close');
     watchedState.sources = state.sources.filter(source => source.id !== btn.id);
     watchedState.posts = state.posts.filter(post => post.sourceId !== btn.id);
-    watchedState.schema = getSchema(state.sources);
   });
 };
 
