@@ -1,4 +1,4 @@
-import { renderPosts, getSchema } from './app';
+import { renderPosts } from './app';
 
 const closeBtnListener = (closeBtn, state, watchedState) => {
   closeBtn.addEventListener('click', (e) => {
