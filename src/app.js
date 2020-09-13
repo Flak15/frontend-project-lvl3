@@ -20,6 +20,38 @@ const getRssItems = (xmlDoc, sourceId) => {
   const items = xmlDoc.querySelectorAll('item');
   return Array.from(items).map(item => parseItem(item, sourceId));
 };
+
+const parse = (data) => {
+  const xmlDoc = (new DOMParser()).parseFromString(data, 'application/xml');
+  const items = xmlDoc.querySelectorAll('item');
+  const posts = Array.from(items).map(item => ({
+    title: xmlItem.querySelector('title').textContent,
+    description: xmlItem.querySelector('description').textContent,
+    link: xmlItem.querySelector('link').innerHTML,
+    pubDate: new Date(xmlItem.querySelector('pubDate').innerHTML),
+    id: _.uniqueId(),
+  }));
+  return {
+    sourceName: xmlDoc.querySelector('channel title').textContent,
+    posts,
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const renderPosts = (state, elements) => {
   const { mountContainer: container } = elements;
   const { posts } = state;
@@ -98,8 +130,10 @@ const app = () => {
       },
     },
   });
+
   const watchedState = onChange(state, (path, value) => watch(path, value,
     elements, state, watchedState));
+
   const updatePosts = () => {
     if (state.sources.length === 0) {
       setTimeout(() => updatePosts(), 5000);
@@ -119,6 +153,7 @@ const app = () => {
     }).then(() => setTimeout(() => updatePosts(), 5000))
       .catch(err => console.log('Error while updating posts: ', err));
   };
+
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (state.inputState === 'valid') {
