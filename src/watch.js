@@ -1,3 +1,5 @@
+/* eslint no-param-reassign: "error" */
+
 import { renderPosts } from './app';
 
 const closeBtnListener = (closeBtn, state, watchedState) => {
