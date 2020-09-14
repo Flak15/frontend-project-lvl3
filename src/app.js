@@ -25,26 +25,17 @@ const parse = (data) => {
   const xmlDoc = (new DOMParser()).parseFromString(data, 'application/xml');
   const items = xmlDoc.querySelectorAll('item');
   const posts = Array.from(items).map(item => ({
-    title: xmlItem.querySelector('title').textContent,
-    description: xmlItem.querySelector('description').textContent,
-    link: xmlItem.querySelector('link').innerHTML,
-    pubDate: new Date(xmlItem.querySelector('pubDate').innerHTML),
+    title: item.querySelector('title').textContent,
+    description: item.querySelector('description').textContent,
+    link: item.querySelector('link').innerHTML,
+    pubDate: new Date(item.querySelector('pubDate').innerHTML),
     id: _.uniqueId(),
   }));
   return {
-    sourceName: xmlDoc.querySelector('channel title').textContent,
+    title: xmlDoc.querySelector('channel title').textContent || 'xxx',
     posts,
   }
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -135,15 +126,19 @@ const app = () => {
     elements, state, watchedState));
 
   const updatePosts = () => {
+    console.log('Update: ' , new Date());
     if (state.sources.length === 0) {
       setTimeout(() => updatePosts(), 5000);
       return;
     }
     const newPostPromises = state.sources.map(source => getRssFeed(source.url)
       .then((rssString) => {
-        const xmlDoc = getXmlDoc(rssString);
-        const newPosts = getNewPosts(xmlDoc, source);
         watchedState.sources.find(src => src.id === source.id).updateDate = new Date();
+        const parsedRss = parse(rssString);
+        const newPosts = parsedRss.posts.filter(post => post.pubDate > source.updateDate);
+        console.log(newPosts);
+        newPosts.forEach(post => post.sourceId = source.id);
+        
         return newPosts;
       }).catch(e => console.log('error: ', e)));
     Promise.all(newPostPromises).then((postsArrays) => {
@@ -156,23 +151,26 @@ const app = () => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (state.inputState === 'valid') {
-      const newUrl = state.inputValue;
-      const newSource = { id: _.uniqueId(), url: newUrl };
-      watchedState.inputState = 'loading';
-      getRssFeed(newUrl).then((rawRss) => {
-        const xmlDoc = getXmlDoc(rawRss);
-        newSource.name = xmlDoc.querySelector('channel title').textContent;
-        newSource.updateDate = new Date();
-        watchedState.sources = [...state.sources, newSource];
-        const newPosts = getRssItems(xmlDoc, newSource.id);
-        watchedState.posts = [...state.posts, ...newPosts];
-        watchedState.inputState = 'idle';
-      }).catch((error) => {
-        watchedState.inputState = 'idle';
-        console.log('Error while adding new rss: ', error);
-      });
+    if (state.inputState !== 'valid') {
+      return;
     }
+    const newUrl = state.inputValue;
+    const newSource = { id: _.uniqueId(), url: newUrl };
+    watchedState.inputState = 'loading';
+    getRssFeed(newUrl).then((rawRss) => {
+      newSource.updateDate = new Date();
+      const parsedRss = parse(rawRss);
+      newSource.name = parsedRss.title;
+      watchedState.sources = [...state.sources, newSource];
+      const newPosts = parsedRss.posts;
+      newPosts.forEach(post => post.sourceId = newSource.id)
+      watchedState.posts = [...state.posts, ...newPosts];
+      watchedState.inputState = 'idle';
+    }).catch((error) => {
+      watchedState.inputState = 'idle';
+      console.log('Error while adding new rss: ', error);
+    });
+    
   });
   elements.input.addEventListener('input', (event) => {
     event.preventDefault();
