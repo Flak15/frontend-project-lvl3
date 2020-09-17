@@ -1,45 +1,9 @@
 /* eslint no-param-reassign: "error" */
 
 import onChange from 'on-change';
-import * as yup from 'yup';
-import axios from 'axios';
 import i18next from 'i18next';
-import _ from 'lodash';
 import ru from './locales/ru';
-import watch from './watch';
-import initView from './view';
-
-const getRssFeed = url => axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then(res => res.data);
-
-// const parseItem = (xmlItem, sourceId) => ({
-//   sourceId,
-//   title: xmlItem.querySelector('title').textContent,
-//   description: xmlItem.querySelector('description').textContent,
-//   link: xmlItem.querySelector('link').innerHTML,
-//   pubDate: new Date(xmlItem.querySelector('pubDate').innerHTML),
-//   id: _.uniqueId(),
-// });
-// const getRssItems = (xmlDoc, sourceId) => {
-//   const items = xmlDoc.querySelectorAll('item');
-//   return Array.from(items).map(item => parseItem(item, sourceId));
-// };
-
-const parse = (data) => {
-  const xmlDoc = (new DOMParser()).parseFromString(data, 'application/xml');
-  const items = xmlDoc.querySelectorAll('item');
-  const posts = Array.from(items).map(item => ({
-    title: item.querySelector('title').textContent,
-    description: item.querySelector('description').textContent,
-    link: item.querySelector('link').innerHTML,
-    pubDate: new Date(item.querySelector('pubDate').innerHTML),
-    id: _.uniqueId(),
-  }));
-  return {
-    title: xmlDoc.querySelector('channel title').textContent,
-    lastPubDate: _.maxBy(posts, post => post.pubDate).pubDate,
-    posts,
-  };
-};
+import { initView, addCloseBtnListeners } from './view';
 
 export const renderPosts = (state, elements) => {
   const { mountContainer: container } = elements;
@@ -61,27 +25,6 @@ export const renderPosts = (state, elements) => {
     container.appendChild(div);
   });
 };
-
-// const getNewPosts = (xmlDoc, source) => {
-//   const items = xmlDoc.querySelectorAll('item');
-//   const newItems = Array.from(items).map((xmlItem) => {
-//     const pubDate = new Date(xmlItem.querySelector('pubDate').textContent);
-//     if (pubDate > source.updateDate) {
-//       return {
-//         sourceId: source.id,
-//         title: xmlItem.querySelector('title').textContent,
-//         description: xmlItem.querySelector('description').textContent,
-//         link: xmlItem.querySelector('link').innerHTML,
-//         pubDate,
-//         id: _.uniqueId(),
-//       };
-//     }
-//     return '';
-//   });
-//   return _.compact(newItems);
-// };
-const getSchema = sources => yup.object()
-  .shape({ url: yup.string().url().notOneOf(sources.map(source => source.url)).required() });
 
 const app = () => {
   const state = {
@@ -119,75 +62,55 @@ const app = () => {
       },
     },
   });
-
-  const watchedState = onChange(state, (path, value) => watch(path, value,
-    elements, state, watchedState));
-
-  const updatePosts = () => {
-    // console.log('Update: ' , new Date());
-    if (state.sources.length === 0) {
-      setTimeout(() => updatePosts(), 5000);
-      return;
-    }
-    const newPostPromises = state.sources.map(source => getRssFeed(source.url)
-      .then((rssString) => {
-        const parsedRss = parse(rssString);
-        const newPosts = parsedRss.posts.filter(post => post.pubDate > source.updateDate);
-        newPosts.forEach(post => _.set(post, 'sourceId', source.id));
-        const source = watchedState.sources.find(src => src.id === source.id);
-        source.updateDate = parsedRss.lastPubDate;
-        return newPosts;
-      }).catch(e => console.log('error: ', e)));
-    Promise.all(newPostPromises).then((postsArrays) => {
-      postsArrays.forEach((newPosts) => {
-        watchedState.posts = [...state.posts, ...newPosts];
+  const watchedState = onChange(state, (path, value) => {
+    const {
+      input, button, feedBackContainer, sourceList,
+    } = elements;
+    if (path === 'inputState') {
+      if (value === 'valid') {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        button.disabled = false;
+      } else if (value === 'invalid') {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        button.disabled = true;
+      } else if (value === 'idle') {
+        input.classList.remove('is-valid');
+        input.value = '';
+        input.disabled = false;
+        button.disabled = false;
+      } else if (value === 'loading') {
+        input.classList.remove('is-valid');
+        input.disabled = true;
+        button.disabled = true;
+      } else {
+        throw new Error('Unknown state: ', value);
+      }
+    } else if (path === 'sources') {
+      sourceList.innerHTML = '';
+      value.forEach((source) => {
+        const sourceElement = document.createElement('div');
+        sourceElement.classList.add('mb-3');
+        sourceElement.innerHTML = `
+          <button type="button" class="close" aria-label="Close" id="${source.id}">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <div>${source.name}</div>`;
+        sourceList.appendChild(sourceElement);
       });
-    }).then(() => setTimeout(() => updatePosts(), 5000))
-      .catch(err => console.log('Error while updating posts: ', err));
-  };
-  initView(watchedState, state, elements);
-  // elements.form.addEventListener('submit', (e) => {
-  //   e.preventDefault();
-  //   if (state.inputState !== 'valid') {
-  //     return;
-  //   }
-  //   const newUrl = state.inputValue;
-  //   watchedState.inputState = 'loading';
-  //   getRssFeed(newUrl).then((rawRss) => {
-  //     const parsedRss = parse(rawRss);
-  //     const newSource = {
-  //       id: _.uniqueId(),
-  //       url: newUrl,
-  //       name: parsedRss.title,
-  //       updateDate: parsedRss.lastPubDate,
-  //     };
-  //     watchedState.sources = [...state.sources, newSource];
-  //     const newPosts = parsedRss.posts;
-  //     newPosts.forEach(post => _.set(post, 'sourceId', newSource.id));
-  //     watchedState.posts = [...state.posts, ...newPosts];
-  //     watchedState.inputState = 'idle';
-  //   }).catch((error) => {
-  //     watchedState.inputState = 'idle';
-  //     console.log('Error while adding new rss: ', error);
-  //   });
-  // });
+      const closeButtons = document.querySelectorAll('button.close');
+      addCloseBtnListeners(closeButtons, state, watchedState);
 
-  // elements.input.addEventListener('input', (event) => {
-  //   event.preventDefault();
-  //   watchedState.inputValue = event.target.value;
-  //   getSchema(state.sources).validate({ url: event.target.value })
-  //     .then(() => {
-  //       watchedState.errors = [];
-  //       watchedState.inputState = 'valid';
-  //     })
-  //     .catch((err) => {
-  //       watchedState.errors = err.errors;
-  //       watchedState.inputState = 'invalid';
-  //     });
-  // });
-  // document.addEventListener('DOMContentLoaded', () => {
-  //   setTimeout(() => updatePosts(), 5000);
-  // });
+      // renderSourceList(value, sourceList, watchedState);
+    } else if (path === 'errors') {
+      feedBackContainer.innerHTML = value.join(', ');
+    } else if (path === 'posts') {
+      renderPosts(state, elements);
+    }
+  });
+
+  initView(watchedState, state, elements);
 };
 
 export default app;
