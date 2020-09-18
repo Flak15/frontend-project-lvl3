@@ -63,7 +63,8 @@ export const initView = (watchedState, state, elements) => {
     if (state.inputState !== 'valid') {
       return;
     }
-    const newUrl = state.inputValue;
+    // const newUrl = state.inputValue;
+    const newUrl = state.urlForm.inputValue;
     watchedState.inputState = 'loading';
     getRssFeed(newUrl).then((rawRss) => {
       const parsedRss = parseRss(rawRss);
@@ -86,13 +87,15 @@ export const initView = (watchedState, state, elements) => {
 
   elements.input.addEventListener('input', (event) => {
     event.preventDefault();
-    watchedState.inputValue = event.target.value;
+    watchedState.urlForm.inputValue = event.target.value;
     getSchema(state.sources).validate({ url: event.target.value })
       .then(() => {
+        watchedState.urlForm.errors = [];
         watchedState.errors = [];
         watchedState.inputState = 'valid';
       })
       .catch((err) => {
+        watchedState.urlForm.errors = err.errors;
         watchedState.errors = err.errors;
         watchedState.inputState = 'invalid';
       });

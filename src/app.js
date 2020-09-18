@@ -2,6 +2,8 @@
 
 import onChange from 'on-change';
 import i18next from 'i18next';
+import { formatRelative } from 'date-fns';
+import { ru as dateRu } from 'date-fns/locale';
 import ru from './locales/ru';
 import { initView, addCloseBtnListeners } from './view';
 
@@ -19,11 +21,18 @@ export const renderPosts = (state, elements) => {
         <hr class="my-4">
         <p class="card-text">${post.description}</p>
         ${post.img ? 'img' : ''}
-        <p class="card-text">${i18next.t('date', { date: post.pubDate, language: i18next.language })}</p>
+        <p class="card-text">${i18next.t('date', { date: post.pubDate })}</p>
         <p class="card-text">${i18next.t('source')}: ${state.sources.find(source => source.id === post.sourceId).name}</p>
       </div>`;
     container.appendChild(div);
   });
+};
+
+const getLangLocale = (language) => {
+  if (language === 'ru') {
+    return dateRu;
+  }
+  return null;
 };
 
 const app = () => {
@@ -33,6 +42,10 @@ const app = () => {
     sources: [],
     posts: [],
     errors: [],
+    urlForm: {
+      errors: [],
+      inputValue: ''
+    }
   };
   const elements = {
     input: document.querySelector('#basic-url'),
@@ -46,23 +59,16 @@ const app = () => {
     lng: 'ru',
     resources: { ru },
     interpolation: {
-      format(value, format) {
+      format(value, format, lng) {
         if (value instanceof Date) {
-          return new Intl.DateTimeFormat(format, {
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          }).format(value);
+          return formatRelative(value, new Date(), { locale: getLangLocale(lng) });
         }
         return value;
       },
     },
   });
   const watchedState = onChange(state, (path, value) => {
+    console.log('Path:', path);
     const {
       input, button, feedBackContainer, sourceList,
     } = elements;
