@@ -97,7 +97,7 @@ export const initView = (watchedState, state, elements) => {
         watchedState.urlForm.inputState = 'invalid';
       });
   });
-  
+
   document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => updatePosts(), 5000);
   });

@@ -45,7 +45,7 @@ const app = () => {
       inputState: 'idle',
     },
   };
-  
+
   const elements = {
     input: document.querySelector('#basic-url'),
     button: document.querySelector('#add'),
