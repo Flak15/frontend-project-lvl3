@@ -37,15 +37,14 @@ const getLangLocale = (language) => {
 
 const app = () => {
   const state = {
-    inputValue: '',
-    inputState: 'idle',
     sources: [],
     posts: [],
     errors: [],
     urlForm: {
       errors: [],
-      inputValue: ''
-    }
+      inputValue: '',
+      inputState: 'idle',
+    },
   };
   const elements = {
     input: document.querySelector('#basic-url'),
@@ -72,7 +71,7 @@ const app = () => {
     const {
       input, button, feedBackContainer, sourceList,
     } = elements;
-    if (path === 'inputState') {
+    if (path === 'urlForm.inputState') {
       if (value === 'valid') {
         input.classList.remove('is-invalid');
         input.classList.add('is-valid');
@@ -107,9 +106,7 @@ const app = () => {
       });
       const closeButtons = document.querySelectorAll('button.close');
       addCloseBtnListeners(closeButtons, state, watchedState);
-
-      // renderSourceList(value, sourceList, watchedState);
-    } else if (path === 'errors') {
+    } else if (path === 'urlForm.errors') {
       feedBackContainer.innerHTML = value.join(', ');
     } else if (path === 'posts') {
       renderPosts(state, elements);

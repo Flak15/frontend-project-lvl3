@@ -60,12 +60,11 @@ export const initView = (watchedState, state, elements) => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (state.inputState !== 'valid') {
+    if (state.urlForm.inputState !== 'valid') {
       return;
     }
-    // const newUrl = state.inputValue;
     const newUrl = state.urlForm.inputValue;
-    watchedState.inputState = 'loading';
+    watchedState.urlForm.inputState = 'loading';
     getRssFeed(newUrl).then((rawRss) => {
       const parsedRss = parseRss(rawRss);
       const newSource = {
@@ -78,7 +77,7 @@ export const initView = (watchedState, state, elements) => {
       const newPosts = parsedRss.posts;
       newPosts.forEach(post => _.set(post, 'sourceId', newSource.id));
       watchedState.posts = [...state.posts, ...newPosts];
-      watchedState.inputState = 'idle';
+      watchedState.urlForm.inputState = 'idle';
     }).catch((error) => {
       watchedState.inputState = 'idle';
       console.log('Error while adding new rss: ', error);
@@ -91,13 +90,11 @@ export const initView = (watchedState, state, elements) => {
     getSchema(state.sources).validate({ url: event.target.value })
       .then(() => {
         watchedState.urlForm.errors = [];
-        watchedState.errors = [];
-        watchedState.inputState = 'valid';
+        watchedState.urlForm.inputState = 'valid';
       })
       .catch((err) => {
         watchedState.urlForm.errors = err.errors;
-        watchedState.errors = err.errors;
-        watchedState.inputState = 'invalid';
+        watchedState.urlForm.inputState = 'invalid';
       });
   });
   document.addEventListener('DOMContentLoaded', () => {
