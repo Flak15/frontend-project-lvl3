@@ -39,13 +39,13 @@ const app = () => {
   const state = {
     sources: [],
     posts: [],
-    errors: [],
     urlForm: {
       errors: [],
       inputValue: '',
       inputState: 'idle',
     },
   };
+  
   const elements = {
     input: document.querySelector('#basic-url'),
     button: document.querySelector('#add'),
@@ -54,6 +54,7 @@ const app = () => {
     form: document.querySelector('#rssInputAddressForm'),
     sourceList: document.querySelector('#source-list'),
   };
+
   i18next.init({
     lng: 'ru',
     resources: { ru },
@@ -66,8 +67,8 @@ const app = () => {
       },
     },
   });
+
   const watchedState = onChange(state, (path, value) => {
-    console.log('Path:', path);
     const {
       input, button, feedBackContainer, sourceList,
     } = elements;
