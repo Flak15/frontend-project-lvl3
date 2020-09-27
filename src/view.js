@@ -18,7 +18,6 @@ const renderPosts = (state, elements) => {
         <h5 class="card-title"><a href="${post.link}">${post.title}</a></h5>
         <hr class="my-4">
         <p class="card-text">${post.description}</p>
-        ${post.img ? 'img' : ''}
         <p class="card-text">${i18next.t('date', { date: post.pubDate })}</p>
         <p class="card-text">${i18next.t('source')}: ${state.sources.find(source => source.id === post.sourceId).name}</p>
       </div>`;
