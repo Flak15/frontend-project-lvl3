@@ -1,6 +1,6 @@
 export default {
   translation: {
-    source: 'Источник',
+    feed: 'Источник',
     date: 'Опубликовано: {{date, dd/MM/yyyy}}',
     error: 'Ошибка: {{error}}',
   },

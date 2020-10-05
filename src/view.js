@@ -1,11 +1,8 @@
 import onChange from 'on-change';
-import i18next from 'i18next';
-import { ru as dateRu } from 'date-fns/locale';
-import { formatRelative } from 'date-fns';
-import ru from './locales/ru';
-import { addCloseBtnListeners } from './app';
 
-const renderPosts = (state, elements) => {
+import { addListenersToRemoveFeedBtns } from './app';
+
+const renderPosts = (state, elements, i18next) => {
   const { mountContainer: container } = elements;
   const { posts } = state;
   container.innerHTML = '';
@@ -18,40 +15,19 @@ const renderPosts = (state, elements) => {
         <h5 class="card-title"><a href="${post.link}">${post.title}</a></h5>
         <hr class="my-4">
         <p class="card-text">${post.description}</p>
-        ${post.img ? 'img' : ''}
         <p class="card-text">${i18next.t('date', { date: post.pubDate })}</p>
-        <p class="card-text">${i18next.t('source')}: ${state.sources.find(source => source.id === post.sourceId).name}</p>
+        <p class="card-text">${i18next.t('feed')}: ${state.feeds.find((feed) => feed.id === post.feedId).name}</p>
       </div>`;
     container.appendChild(div);
   });
 };
 
-const getLangLocale = (language) => {
-  if (language === 'ru') {
-    return dateRu;
-  }
-  return null;
-};
-
-export default (state, elements) => {
-  i18next.init({
-    lng: 'ru',
-    resources: { ru },
-    interpolation: {
-      format(value, format, lng) {
-        if (value instanceof Date) {
-          return formatRelative(value, new Date(), { locale: getLangLocale(lng) });
-        }
-        return value;
-      },
-    },
-  });
-
+export default (state, elements, i18next) => {
   const watchedState = onChange(state, (path, value) => {
     const {
-      input, button, feedBackContainer, sourceList,
+      input, button, feedBackContainer, feedList,
     } = elements;
-    if (path === 'urlForm.inputState') {
+    if (path === 'urlForm.formState') {
       if (value === 'valid') {
         input.classList.remove('is-invalid');
         input.classList.add('is-valid');
@@ -72,24 +48,24 @@ export default (state, elements) => {
       } else {
         throw new Error('Unknown state: ', value);
       }
-    } else if (path.includes('sources')) {
-      sourceList.innerHTML = '';
-      value.forEach((source) => {
-        const sourceElement = document.createElement('div');
-        sourceElement.classList.add('mb-3');
-        sourceElement.innerHTML = `
-          <button type="button" class="close" aria-label="Close" id="${source.id}">
+    } else if (path.includes('feeds')) {
+      feedList.innerHTML = '';
+      value.forEach((feed) => {
+        const feedElement = document.createElement('div');
+        feedElement.classList.add('mb-3');
+        feedElement.innerHTML = `
+          <button type="button" class="close" aria-label="Close" id="${feed.id}">
             <span aria-hidden="true">&times;</span>
           </button>
-          <div>${source.name}</div>`;
-        sourceList.appendChild(sourceElement);
+          <div>${feed.name}</div>`;
+        feedList.appendChild(feedElement);
       });
-      const closeButtons = document.querySelectorAll('button.close');
-      addCloseBtnListeners(closeButtons, state, watchedState);
+      const removeFeedBtns = document.querySelectorAll('button.close');
+      addListenersToRemoveFeedBtns(removeFeedBtns, state, watchedState);
     } else if (path === 'urlForm.errors') {
       feedBackContainer.innerHTML = value.join(', ');
     } else if (path.includes('posts')) {
-      renderPosts(state, elements);
+      renderPosts(state, elements, i18next);
     }
   });
 
