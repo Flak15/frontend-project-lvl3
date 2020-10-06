@@ -1,6 +1,18 @@
 import onChange from 'on-change';
+// import { addListenersToRemoveFeedBtns } from './app';
 
-import { addListenersToRemoveFeedBtns } from './app';
+/* eslint-disable no-param-reassign */
+const addListenersToRemoveFeedBtns = (removeFeedBtns, state, watchedState) => {
+  removeFeedBtns.forEach((removeFeedBtn) => {
+    removeFeedBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const btn = e.target.closest('.close');
+      watchedState.feeds = state.feeds.filter((feed) => feed.id !== btn.id);
+      watchedState.posts = state.posts.filter((post) => post.feedId !== btn.id);
+    });
+  });
+};
+/* eslint-enable no-param-reassign */
 
 const renderPosts = (state, elements, i18next) => {
   const { mountContainer: container } = elements;

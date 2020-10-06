@@ -13,7 +13,6 @@ export const parseRss = (data) => {
   }));
   return {
     title: xmlDoc.querySelector('channel title').textContent,
-    //lastPubDate: _.maxBy(posts, (post) => post.pubDate).pubDate, //?????
     posts,
   };
 };

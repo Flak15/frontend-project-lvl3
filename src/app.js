@@ -2,7 +2,6 @@
 
 import * as yup from 'yup';
 import _ from 'lodash';
-
 import i18next from 'i18next';
 import { ru as dateRu } from 'date-fns/locale';
 import { formatRelative } from 'date-fns';
@@ -25,17 +24,6 @@ const getSchema = (feeds) => yup.object()
       .notOneOf(feeds.map((feed) => feed.url))
       .required(),
   });
-
-export const addListenersToRemoveFeedBtns = (removeFeedBtns, state, watchedState) => {
-  removeFeedBtns.forEach((removeFeedBtn) => {
-    removeFeedBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const btn = e.target.closest('.close');
-      watchedState.feeds = state.feeds.filter((feed) => feed.id !== btn.id);
-      watchedState.posts = state.posts.filter((post) => post.feedId !== btn.id);
-    });
-  });
-};
 
 const app = () => {
   const state = {
@@ -68,7 +56,7 @@ const app = () => {
         return value;
       },
     },
-  }); //then?
+  }); // then?
 
   const watchedState = initView(state, elements, i18next);
 
