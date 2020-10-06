@@ -1,5 +1,4 @@
 import onChange from 'on-change';
-// import { addListenersToRemoveFeedBtns } from './app';
 
 /* eslint-disable no-param-reassign */
 const addListenersToRemoveFeedBtns = (removeFeedBtns, state, watchedState) => {
@@ -60,7 +59,7 @@ export default (state, elements, i18next) => {
       } else {
         throw new Error('Unknown state: ', value);
       }
-    } else if (path.includes('feeds')) {
+    } else if (path === 'feeds') {
       feedList.innerHTML = '';
       value.forEach((feed) => {
         const feedElement = document.createElement('div');

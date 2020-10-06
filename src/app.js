@@ -25,6 +25,66 @@ const getSchema = (feeds) => yup.object()
       .required(),
   });
 
+const updatePosts = (watchedState) => {
+  if (watchedState.feeds.length === 0) {
+    setTimeout(() => updatePosts(watchedState), 5000);
+    return;
+  }
+  const newPostsPromises = watchedState.feeds.map((feed) => getRssFeed(feed.url)
+    .then((rssString) => {
+      const parsedRss = parseRss(rssString);
+      const newPosts = parsedRss.posts
+        .filter((post) => post.pubDate > feed.updateDate)
+        .map((post) => ({ ...post, feedId: feed.id }));
+      const lastPost = _.maxBy(parsedRss.posts, (post) => post.pubDate);
+      feed.updateDate = lastPost.pubDate;
+      return newPosts;
+    }).catch((e) => console.log('Error while updating posts: ', e)));
+  Promise.all(newPostsPromises).then((postsLists) => {
+    postsLists.forEach((newPosts) => {
+      watchedState.posts.push(...newPosts);
+    });
+  }).then(() => setTimeout(() => updatePosts(watchedState), 5000));
+};
+
+const addNewFeed = (watchedState) => {
+  if (watchedState.urlForm.formState !== 'valid') {
+    return;
+  }
+  const newUrl = watchedState.urlForm.inputValue;
+  watchedState.urlForm.formState = 'loading';
+  getRssFeed(newUrl).then((rawRss) => {
+    const parsedRss = parseRss(rawRss);
+    const lastPost = _.maxBy(parsedRss.posts, (post) => post.pubDate);
+    const newFeed = {
+      id: _.uniqueId(),
+      url: newUrl,
+      name: parsedRss.title,
+      updateDate: lastPost.pubDate,
+    };
+    watchedState.feeds.push(newFeed);
+    const newPosts = parsedRss.posts.map((post) => ({ ...post, feedId: newFeed.id }));
+    watchedState.posts.push(...newPosts);
+    watchedState.urlForm.formState = 'idle';
+  }).catch((error) => {
+    watchedState.urlForm.formState = 'idle';
+    console.log('Error while adding new rss: ', error);
+  });
+};
+
+const updateFormInput = (watchedState, event) => {
+  watchedState.urlForm.inputValue = event.target.value;
+  getSchema(watchedState.feeds).validate({ url: event.target.value })
+    .then(() => {
+      watchedState.urlForm.errors = [];
+      watchedState.urlForm.formState = 'valid';
+    })
+    .catch((err) => {
+      watchedState.urlForm.errors = err.errors;
+      watchedState.urlForm.formState = 'invalid';
+    });
+};
+
 const app = () => {
   const state = {
     feeds: [],
@@ -56,75 +116,22 @@ const app = () => {
         return value;
       },
     },
-  }); // then?
-
-  const watchedState = initView(state, elements, i18next);
-
-  const updatePosts = () => {
-    if (state.feeds.length === 0) {
-      setTimeout(() => updatePosts(), 5000);
-      return;
-    }
-    const newPostsPromises = state.feeds.map((feed) => getRssFeed(feed.url)
-      .then((rssString) => {
-        const parsedRss = parseRss(rssString);
-        const newPosts = parsedRss.posts
-          .filter((post) => post.pubDate > feed.updateDate)
-          .map((post) => ({ ...post, feedId: feed.id }));
-        const lastPost = _.maxBy(parsedRss.posts, (post) => post.pubDate);
-        feed.updateDate = lastPost.pubDate;
-        return newPosts;
-      }).catch((e) => console.log('Error while updating posts: ', e)));
-    Promise.all(newPostsPromises).then((postsLists) => {
-      postsLists.forEach((newPosts) => {
-        watchedState.posts.push(...newPosts);
+  }).then(() => initView(state, elements, i18next))
+    .then((watchedState) => {
+      elements.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        addNewFeed(watchedState);
       });
-    }).then(() => setTimeout(() => updatePosts(), 5000));
-  };
 
-  elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (state.urlForm.formState !== 'valid') {
-      return;
-    }
-    const newUrl = state.urlForm.inputValue;
-    watchedState.urlForm.formState = 'loading';
-    getRssFeed(newUrl).then((rawRss) => {
-      const parsedRss = parseRss(rawRss);
-      const lastPost = _.maxBy(parsedRss.posts, (post) => post.pubDate);
-      const newFeed = {
-        id: _.uniqueId(),
-        url: newUrl,
-        name: parsedRss.title,
-        updateDate: lastPost.pubDate,
-      };
-      watchedState.feeds.push(newFeed);
-      const newPosts = parsedRss.posts.map((post) => ({ ...post, feedId: newFeed.id }));
-      watchedState.posts.push(...newPosts);
-      watchedState.urlForm.formState = 'idle';
-    }).catch((error) => {
-      watchedState.urlForm.formState = 'idle';
-      console.log('Error while adding new rss: ', error);
+      elements.input.addEventListener('input', (event) => {
+        event.preventDefault();
+        updateFormInput(watchedState, event);
+      });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => updatePosts(watchedState), 5000);
+      });
     });
-  });
-
-  elements.input.addEventListener('input', (event) => {
-    event.preventDefault();
-    watchedState.urlForm.inputValue = event.target.value;
-    getSchema(state.feeds).validate({ url: event.target.value })
-      .then(() => {
-        watchedState.urlForm.errors = [];
-        watchedState.urlForm.formState = 'valid';
-      })
-      .catch((err) => {
-        watchedState.urlForm.errors = err.errors;
-        watchedState.urlForm.formState = 'invalid';
-      });
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => updatePosts(), 5000);
-  });
 };
 
 export default app;
