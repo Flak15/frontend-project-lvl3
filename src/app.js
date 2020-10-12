@@ -116,7 +116,7 @@ const app = () => {
         return value;
       },
     },
-  }).then(() => initView(state, elements, i18next))
+  }).then(() => initView(state, elements))
     .then((watchedState) => {
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();

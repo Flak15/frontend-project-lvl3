@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import i18next from 'i18next';
 
 /* eslint-disable no-param-reassign */
 const addListenersToRemoveFeedBtns = (removeFeedBtns, state, watchedState) => {
@@ -33,7 +34,7 @@ const renderPosts = (state, elements, i18next) => {
   });
 };
 
-export default (state, elements, i18next) => {
+export default (state, elements) => {
   const watchedState = onChange(state, (path, value) => {
     const {
       input, button, feedBackContainer, feedList,
