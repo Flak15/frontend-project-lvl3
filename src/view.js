@@ -14,7 +14,7 @@ const addListenersToRemoveFeedBtns = (removeFeedBtns, state, watchedState) => {
 };
 /* eslint-enable no-param-reassign */
 
-const renderPosts = (state, elements, i18next) => {
+const renderPosts = (state, elements) => {
   const { mountContainer: container } = elements;
   const { posts } = state;
   container.innerHTML = '';
@@ -77,7 +77,7 @@ export default (state, elements) => {
     } else if (path === 'urlForm.errors') {
       feedBackContainer.innerHTML = value.join(', ');
     } else if (path.includes('posts')) {
-      renderPosts(state, elements, i18next);
+      renderPosts(state, elements);
     }
   });
 
